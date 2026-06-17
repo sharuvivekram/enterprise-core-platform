@@ -5,7 +5,7 @@ metadata:
   labels:
     app: enterprise-app
 spec:
-  replicas: 2 # Spreads across both available AZ worker nodes for high availability
+  replicas: 2
   selector:
     matchLabels:
       app: enterprise-app
@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: python-app
-        image: python:3.9-slim # A lightweight Python image to protect your memory footprint
-        command: ["python", "-m", "http.server", "8000"] # Spins up a quick built-in web server for testing
+        image: python:3.9-slim
+        command: ["python", "-m", "http.server", "8000"]
         ports:
         - containerPort: 8000
         resources:
@@ -27,16 +27,3 @@ spec:
           limits:
             memory: "250Mi"
             cpu: "100m"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: enterprise-app-service
-spec:
-  type: LoadBalancer # Tells AWS to provision a real cloud Load Balancer so you can visit your app via the web browser
-  selector:
-    app: enterprise-app
-  ports:
-    - protocol: TCP
-      port: 80      # The public web port you will access in your browser
-      targetPort: 8000 # The internal port your container is listening on
