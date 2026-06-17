@@ -1,0 +1,47 @@
+name: Enterprise Core Platform CI/CD
+
+on:
+  push:
+    branches:
+      - main # Triggers the pipeline automatically whenever code hits the main branch
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # 1. Pull down the repository code into the runner environment
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    # 2. Setup Terraform on the runner to validate our IaC files
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.5.0"
+
+    - name: Validate Terraform Code
+      run: |
+        cd terraform
+        terraform init -backend=false
+        terraform validate
+
+    # 3. Setup AWS Credentials securely using our Repository Secrets
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    # 4. Install kubectl on the automated pipeline machine
+    - name: Setup Kubernetes CLI (kubectl)
+      uses: azure/setup-kubectl@v4
+      with:
+        version: 'v1.31.0'
+
+    # 5. Check if the cluster is alive and reachable
+    - name: Verify Cluster Connectivity
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name Production-eks-cluster
+        kubectl get nodes
