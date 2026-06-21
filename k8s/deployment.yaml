@@ -5,7 +5,7 @@ metadata:
   labels:
     app: enterprise-app
 spec:
-  replicas: 2
+  replicas: 1
   # --- ADDED: ZERO-DOWNTIME ROLLING UPDATE STRATEGY ---
   strategy:
     type: RollingUpdate
@@ -27,11 +27,11 @@ spec:
         - containerPort: 8000
         resources:
           requests:
-            memory: "100Mi"
-            cpu: "50m"
+            memory: "50Mi"
+            cpu: "25m"
           limits:
-            memory: "250Mi"
-            cpu: "100m"
+            memory: "150Mi"
+            cpu: "50m"
         livenessProbe:
           httpGet:
             path: /
