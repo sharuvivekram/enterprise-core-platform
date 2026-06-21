@@ -32,16 +32,17 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # 3. Build and Push the Custom Flask Image
+    # 3. Build and Push the Custom Flask Image (Armed with Linux/AMD64 Compilation!)
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v5
       with:
         context: ./app
         file: ./app/Dockerfile
         push: true
+        platforms: linux/amd64  # 🛠️ FIX 1: Explicitly forces compilation for Intel/AMD cloud servers
         tags: |
-          ${{ secrets.DOCKER_USERNAME }}/enterprise-core-app:latest
-          ${{ secrets.DOCKER_USERNAME }}/enterprise-core-app:${{ github.sha }}
+          ${{ secrets.DOCKER_USERNAME }}/enterprise-core-platform:latest
+          ${{ secrets.DOCKER_USERNAME }}/enterprise-core-platform:${{ github.sha }}
 
     # 4. Setup AWS Credentials for Deployment Context
     - name: Configure AWS Credentials
@@ -66,8 +67,8 @@ jobs:
     - name: Update Manifest & Deploy to EKS
       run: |
         cd k8s
-        # Uses sed to dynamically replace the placeholder image tag with our fresh Git Commit SHA
-        sed -i 's|image: python:3.9-slim|image: ${{ secrets.DOCKER_USERNAME }}/enterprise-core-app:${{ github.sha }}|g' deployment.yaml
+        # 🛠️ FIX 2: Dynamically replaces whatever image is currently there with our fresh commit SHA
+        sed -i 's|image: .*|image: ${{ secrets.DOCKER_USERNAME }}/enterprise-core-platform:${{ github.sha }}|g' deployment.yaml
         # Apply the updated separate deployment and service configurations
         kubectl apply -f .
         # Force a rolling update to guarantee Kubernetes pulls the fresh container image
