@@ -1,18 +1,19 @@
-from flask import Flask, jsonify
 import os
-import datetime
+from flask import Flask
+from datetime import datetime
 
 app = Flask(__name__)
 
 @app.route('/')
-def health_check():
-    return jsonify({
-        "status": "Fully Operational - Production Blueprint Active",
-        "environment": os.getenv("ENVIRONMENT", "Production"),
-        "platform": "Enterprise Core System",
-        "timestamp": datetime.datetime.now().isoformat()
-    }), 200
+def home():
+    return {
+        # 🔌 Now it dynamically pulls from the ConfigMap injection!
+        # os.getenv("VARIABLE_NAME", "FALLBACK_VALUE")
+        "environment": os.getenv("APP_ENV", "Local-Development"),
+        "platform": os.getenv("PLATFORM_NAME", "Fallback-Platform-Name"),
+        "status": os.getenv("APP_STATUS", "Running without ConfigMap"),
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 if __name__ == '__main__':
-    # Running on port 8000 to match our existing service configurations
     app.run(host='0.0.0.0', port=8000)
