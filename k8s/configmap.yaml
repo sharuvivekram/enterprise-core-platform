@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enterprise-app-config
+data:
+  APP_ENV: "Production-Cluster"
+  PLATFORM_NAME: "Enterprise Core Platform Architecture v2"
+  APP_STATUS: "Fully Operational - ConfigMap Injected Seamlessly"

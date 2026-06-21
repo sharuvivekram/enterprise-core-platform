@@ -3,22 +3,21 @@ kind: Deployment
 metadata:
   name: enterprise-app-deployment
   labels:
-    app: enterprise-app
+    app: enterprise-core
 spec:
   replicas: 1
-  # --- ADDED: ZERO-DOWNTIME ROLLING UPDATE STRATEGY ---
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1       # Allows Kubernetes to spin up 1 extra pod during updates
-      maxUnavailable: 0 # Forces Kubernetes to keep all old pods alive until new ones are healthy
+      maxSurge: 1       
+      maxUnavailable: 0 
   selector:
     matchLabels:
-      app: enterprise-app
+      app: enterprise-core
   template:
     metadata:
       labels:
-        app: enterprise-app
+        app: enterprise-core
     spec:
       containers:
       - name: python-app
@@ -33,6 +32,10 @@ spec:
           limits:
             memory: "150Mi"
             cpu: "50m"
+        envFrom:
+        - configMapRef:
+            name: enterprise-app-config
+
         livenessProbe:
           httpGet:
             path: /
