@@ -22,7 +22,8 @@ spec:
     spec:
       containers:
       - name: python-app
-        image: sjcesharathkumar/enterprise-core-platform:latest 
+        image: sjcesharathkumar/enterprise-core-platform:latest
+        imagePullPolicy: Always  
         ports:
         - containerPort: 8000
         resources:
