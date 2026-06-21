@@ -6,6 +6,12 @@ metadata:
     app: enterprise-app
 spec:
   replicas: 2
+  # --- ADDED: ZERO-DOWNTIME ROLLING UPDATE STRATEGY ---
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1       # Allows Kubernetes to spin up 1 extra pod during updates
+      maxUnavailable: 0 # Forces Kubernetes to keep all old pods alive until new ones are healthy
   selector:
     matchLabels:
       app: enterprise-app
@@ -16,8 +22,7 @@ spec:
     spec:
       containers:
       - name: python-app
-        image: python:3.9-slim
-        command: ["python", "-m", "http.server", "8000"]
+        image: sjcesharathkumar/app:latest 
         ports:
         - containerPort: 8000
         resources:
@@ -27,3 +32,15 @@ spec:
           limits:
             memory: "250Mi"
             cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
